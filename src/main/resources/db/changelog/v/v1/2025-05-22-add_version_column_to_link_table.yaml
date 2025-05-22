@@ -1,0 +1,26 @@
+databaseChangeLog:
+  - changeSet:
+      id: add_version_column_to_link_table
+      author: vladislavkolos
+      preConditions:
+        - onFail: MARK_RAN
+        - tableExists:
+            tableName: link
+        - not:
+            columnExists:
+              tableName: link
+              columnName: version
+      changes:
+        - addColumn:
+            tableName: link
+            columns:
+              - column:
+                  name: version
+                  type: BIGINT
+                  defaultValueNumeric: "0"
+                  constraints:
+                    nullable: false
+      rollback:
+        - dropColumn:
+            tableName: link
+            columnName: version

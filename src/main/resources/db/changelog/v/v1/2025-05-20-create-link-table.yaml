@@ -1,0 +1,65 @@
+databaseChangeLog:
+  - changeSet:
+      id: create_link_table
+      author: vladislavkolos
+      preConditions:
+        - onFail: MARK_RAN
+          not:
+            tableExists:
+              tableName: link
+      changes:
+        - createTable:
+            tableName: link
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: TIMESTAMP WITH TIME ZONE
+                  defaultValueComputed: CURRENT_TIMESTAMP
+                  constraints:
+                    nullable: false
+              - column:
+                  name: original_url
+                  type: VARCHAR(2048)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: short_key
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: alias
+                  type: VARCHAR(255)
+                  constraints:
+                    unique: true
+              - column:
+                  name: expires_at
+                  type: TIMESTAMP WITH TIME ZONE
+              - column:
+                  name: is_active
+                  type: BOOLEAN
+                  constraints:
+                    nullable: false
+                  defaultValueBoolean: true
+              - column:
+                  name: click_count
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+                  defaultValueNumeric: "0"
+      rollback:
+        - dropTable:
+            tableName: link

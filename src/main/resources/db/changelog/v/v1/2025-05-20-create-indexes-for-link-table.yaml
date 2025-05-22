@@ -1,0 +1,41 @@
+databaseChangeLog:
+  - changeSet:
+      id: create_indexes_for_link_table
+      author: vladislavkolos
+      preConditions:
+        - onFail: MARK_RAN
+        - tableExists:
+            tableName: link
+        - not:
+            indexExists:
+              tableName: link
+              indexName: idx_link_short_key
+      changes:
+        - createIndex:
+            indexName: idx_link_short_key
+            tableName: link
+            columns:
+              - column:
+                  name: short_key
+        - createIndex:
+            indexName: idx_link_alias
+            tableName: link
+            columns:
+              - column:
+                  name: alias
+        - createIndex:
+            indexName: idx_link_expires_at
+            tableName: link
+            columns:
+              - column:
+                  name: expires_at
+      rollback:
+        - dropIndex:
+            indexName: idx_link_short_key
+            tableName: link
+        - dropIndex:
+            indexName: idx_link_alias
+            tableName: link
+        - dropIndex:
+            indexName: idx_link_expires_at
+            tableName: link

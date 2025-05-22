@@ -1,0 +1,61 @@
+services:
+  postgres:
+    image: postgres:16
+    env_file:
+      - .env
+    container_name: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${DATASOURCE_USERNAME}
+      POSTGRES_PASSWORD: ${DATASOURCE_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - link_shortening_network
+    restart: always
+
+  postgres-test:
+    image: postgres:16
+    env_file:
+      - .env
+    container_name: postgres-test
+    ports:
+      - "55432:5432"
+    environment:
+      POSTGRES_DB: ${TEST_POSTGRES_DB}
+      POSTGRES_USER: ${TEST_DATASOURCE_USERNAME}
+      POSTGRES_PASSWORD: ${TEST_DATASOURCE_PASSWORD}
+    volumes:
+      - postgres_test_data:/var/lib/postgresql/data
+    networks:
+      - link_shortening_network
+    restart: always
+    profiles:
+      - test
+
+  app:
+    build:
+      context: .
+    container_name: link-shortening-service
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+    environment:
+      SPRING_DATASOURCE_URL: ${DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${DATASOURCE_PASSWORD}
+      SPRING_PROFILES_ACTIVE: dev
+    networks:
+      - link_shortening_network
+
+volumes:
+  postgres_data:
+  postgres_test_data:
+
+networks:
+  link_shortening_network:
