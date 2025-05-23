@@ -6,15 +6,21 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.jdbc.Sql;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @DataJpaTest
 @ActiveProfiles("test")
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
+@Sql(scripts = "/sql/cleanup.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 public class LinkRepositoryTest {
 
     @Autowired
@@ -67,6 +73,23 @@ public class LinkRepositoryTest {
         var saved = saveLink(expired);
 
         assertThat(saved.getIsActive()).isFalse();
+    }
+
+    @Test
+    @Transactional(propagation = Propagation.NEVER)
+    public void shouldThrowOptimisticLockingFailureExceptionWhenUpdatingStaleEntity() {
+        var persistedLink = saveLink(TestDataBuilderUtil.createValidLink());
+
+        var upToDateCopy = linkRepository.findById(persistedLink.getId()).orElseThrow();
+        var staleCopy = linkRepository.findById(persistedLink.getId()).orElseThrow();
+
+        upToDateCopy.setClickCount(upToDateCopy.getClickCount() + 1);
+        linkRepository.save(upToDateCopy);
+
+        staleCopy.setClickCount(staleCopy.getClickCount() + 1);
+
+        assertThatThrownBy(() -> linkRepository.save(staleCopy))
+                .isInstanceOf(ObjectOptimisticLockingFailureException.class);
     }
 
     private Link saveLink(Link testLink) {
