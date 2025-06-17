@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: link-app
+  labels:
+    app: link-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: link-app
+  template:
+    metadata:
+      labels:
+        app: link-app
+    spec:
+      containers:
+        - name: link-app
+          image: link-shortening-service:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8080
+          env:
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: link-secret
+                  key: DATASOURCE_USERNAME
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: link-secret
+                  key: DATASOURCE_PASSWORD
+            - name: SPRING_DATASOURCE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: link-config
+                  key: SPRING_DATASOURCE_URL
+            - name: SPRING_PROFILES_ACTIVE
+              valueFrom:
+                configMapKeyRef:
+                  name: link-config
+                  key: SPRING_PROFILES_ACTIVE
