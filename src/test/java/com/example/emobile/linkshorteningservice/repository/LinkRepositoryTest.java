@@ -1,6 +1,6 @@
 package com.example.emobile.linkshorteningservice.repository;
 
-import com.example.emobile.linkshorteningservice.model.Link;
+import com.example.emobile.linkshorteningservice.model.LinkEntity;
 import com.example.emobile.linkshorteningservice.util.TestDataBuilderUtil;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +30,7 @@ public class LinkRepositoryTest {
     public void shouldSaveAndRetrieveLinkByShortKey() {
         var link = saveLink(TestDataBuilderUtil.createValidLink());
 
-        Optional<Link> retrieved = linkRepository.findByShortKey(link.getShortKey());
+        Optional<LinkEntity> retrieved = linkRepository.findByShortKey(link.getShortKey());
 
         assertThat(retrieved).isPresent();
         assertThat(retrieved.get().getOriginalUrl()).isEqualTo(link.getOriginalUrl());
@@ -92,7 +92,7 @@ public class LinkRepositoryTest {
                 .isInstanceOf(ObjectOptimisticLockingFailureException.class);
     }
 
-    private Link saveLink(Link testLink) {
-        return linkRepository.save(testLink);
+    private LinkEntity saveLink(LinkEntity testLinkEntity) {
+        return linkRepository.save(testLinkEntity);
     }
 }

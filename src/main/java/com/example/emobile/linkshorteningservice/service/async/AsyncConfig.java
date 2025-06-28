@@ -17,14 +17,20 @@ public class AsyncConfig {
 
     @Bean
     public Executor taskExecutor() {
-        var executor = new ThreadPoolTaskExecutor();
+        var threadPoolExecutor = new ThreadPoolTaskExecutor();
 
-        executor.setCorePoolSize(CORE_POOL_SIZE);
-        executor.setMaxPoolSize(MAX_POOL_SIZE);
-        executor.setQueueCapacity(QUEUE_CAPACITY);
-        executor.setThreadNamePrefix(THREAD_NAME_PREFIX);
-        executor.initialize();
+        threadPoolExecutor.setCorePoolSize(CORE_POOL_SIZE);
+        threadPoolExecutor.setMaxPoolSize(MAX_POOL_SIZE);
+        threadPoolExecutor.setQueueCapacity(QUEUE_CAPACITY);
+        threadPoolExecutor.setThreadNamePrefix(THREAD_NAME_PREFIX);
+        threadPoolExecutor.setRejectedExecutionHandler((r, executor) -> {
+            if (r instanceof Runnable runnable) {
+                runnable.run();
+            }
+        });
 
-        return executor;
+        threadPoolExecutor.initialize();
+
+        return threadPoolExecutor;
     }
 }

@@ -1,7 +1,7 @@
 package com.example.emobile.linkshorteningservice.service.validator.impl;
 
 import com.example.emobile.linkshorteningservice.exception.LinkExpiredException;
-import com.example.emobile.linkshorteningservice.model.Link;
+import com.example.emobile.linkshorteningservice.model.LinkEntity;
 import com.example.emobile.linkshorteningservice.service.validator.LinkValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -11,8 +11,8 @@ import org.springframework.stereotype.Service;
 public class ActiveStatusValidatorImpl implements LinkValidator {
 
     @Override
-    public void validate(Link link) {
-        if (!link.getIsActive()) {
+    public void validate(LinkEntity linkEntity) {
+        if (!linkEntity.getIsActive()) {
             throw new LinkExpiredException("Link is inactive");
         }
     }

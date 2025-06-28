@@ -4,7 +4,7 @@ import com.example.emobile.linkshorteningservice.dto.request.LinkRequestDto;
 import com.example.emobile.linkshorteningservice.dto.response.LinkResponseDto;
 import com.example.emobile.linkshorteningservice.exception.LinkNotFoundException;
 import com.example.emobile.linkshorteningservice.mapper.LinkMapper;
-import com.example.emobile.linkshorteningservice.model.Link;
+import com.example.emobile.linkshorteningservice.model.LinkEntity;
 import com.example.emobile.linkshorteningservice.repository.LinkRepository;
 import com.example.emobile.linkshorteningservice.service.async.AsyncClickService;
 import com.example.emobile.linkshorteningservice.service.generator.KeyGenerator;
@@ -45,7 +45,7 @@ public class LinkServiceImplTest {
     @InjectMocks
     private LinkServiceImpl linkService;
 
-    private Link linkEntity;
+    private LinkEntity linkEntity;
     private LinkRequestDto request;
     private LinkResponseDto response;
 
@@ -54,12 +54,11 @@ public class LinkServiceImplTest {
         request = TestDataBuilderUtil.createValidLinkRequestDto();
         linkEntity = TestDataBuilderUtil.createValidLink();
 
-        response = LinkResponseDto.builder()
-                .shortKey(linkEntity.getShortKey())
-                .alias(linkEntity.getAlias())
-                .expiresAt(linkEntity.getExpiresAt())
-                .isActive(linkEntity.getIsActive())
-                .build();
+        response = new LinkResponseDto(
+                linkEntity.getShortKey(),
+                linkEntity.getAlias(),
+                linkEntity.getExpiresAt(),
+                linkEntity.getIsActive());
     }
 
     @Test

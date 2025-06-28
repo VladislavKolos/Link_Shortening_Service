@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
@@ -83,11 +83,10 @@ public class LinkShorteningServiceExceptionHandler {
     }
 
     private ExceptionDto buildExceptionResponse(ErrorMessage errorMessage, String customMessage, String path) {
-        return ExceptionDto.builder()
-                .errorCode(errorMessage.getErrorCode())
-                .message(customMessage)
-                .path(path)
-                .timestamp(LocalDateTime.now().truncatedTo(ChronoUnit.MINUTES))
-                .build();
+        return new ExceptionDto(
+                errorMessage.getErrorCode(),
+                customMessage,
+                path,
+                OffsetDateTime.now().truncatedTo(ChronoUnit.MINUTES));
     }
 }

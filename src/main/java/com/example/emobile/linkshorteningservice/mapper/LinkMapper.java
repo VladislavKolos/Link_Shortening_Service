@@ -3,12 +3,12 @@ package com.example.emobile.linkshorteningservice.mapper;
 import com.example.emobile.linkshorteningservice.dto.request.LinkRequestDto;
 import com.example.emobile.linkshorteningservice.dto.response.LinkResponseDto;
 import com.example.emobile.linkshorteningservice.exception.InvalidTtlException;
-import com.example.emobile.linkshorteningservice.model.Link;
+import com.example.emobile.linkshorteningservice.model.LinkEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @Mapper(componentModel = "spring")
 public interface LinkMapper {
@@ -17,7 +17,7 @@ public interface LinkMapper {
     boolean DEFAULT_ACTIVE_STATUS = true;
 
     @Mapping(target = "isActive", source = "entity", qualifiedByName = "isActive")
-    LinkResponseDto toLinkResponseDto(Link entity);
+    LinkResponseDto toLinkResponseDto(LinkEntity entity);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "version", ignore = true)
@@ -26,20 +26,20 @@ public interface LinkMapper {
     @Mapping(target = "clickCount", source = "request", qualifiedByName = "setInitialClickCount")
     @Mapping(target = "isActive", source = "request", qualifiedByName = "setInitialActiveStatus")
     @Mapping(target = "expiresAt", source = "request.ttlInSeconds", qualifiedByName = "calculateExpiresAt")
-    Link toLinkEntity(LinkRequestDto request, String shortKey);
+    LinkEntity toLinkEntity(LinkRequestDto request, String shortKey);
 
     @Named("isActive")
-    default boolean isActive(Link entity) {
+    default boolean isActive(LinkEntity entity) {
         return entity.getIsActive() &&
-                (entity.getExpiresAt() == null || entity.getExpiresAt().isAfter(LocalDateTime.now()));
+                (entity.getExpiresAt() == null || entity.getExpiresAt().isAfter(OffsetDateTime.now()));
     }
 
     @Named("calculateExpiresAt")
-    default LocalDateTime calculateExpiresAt(Long ttlInSeconds) {
+    default OffsetDateTime calculateExpiresAt(Long ttlInSeconds) {
         if (ttlInSeconds != null && ttlInSeconds < MIN_TTL_VALUE) {
             throw new InvalidTtlException("TTL must be at least " + MIN_TTL_VALUE + " second");
         }
-        return ttlInSeconds != null ? LocalDateTime.now().plusSeconds(ttlInSeconds) : null;
+        return ttlInSeconds != null ? OffsetDateTime.now().plusSeconds(ttlInSeconds) : null;
     }
 
     @Named("setInitialClickCount")

@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 @Entity
 @Getter
@@ -19,7 +19,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "link")
-public class Link extends BaseEntity {
+public class LinkEntity extends BaseEntity {
 
     @NotBlank
     @Size(max = 2048)
@@ -36,7 +36,7 @@ public class Link extends BaseEntity {
     private String alias;
 
     @Column(name = "expires_at")
-    private LocalDateTime expiresAt;
+    private OffsetDateTime expiresAt;
 
     @NotNull
     @Column(name = "is_active")
@@ -49,7 +49,7 @@ public class Link extends BaseEntity {
     @PreUpdate
     @PrePersist
     public void checkExpiration() {
-        if (expiresAt != null && expiresAt.isBefore(LocalDateTime.now())) {
+        if (expiresAt != null && expiresAt.isBefore(OffsetDateTime.now())) {
             isActive = false;
         }
     }

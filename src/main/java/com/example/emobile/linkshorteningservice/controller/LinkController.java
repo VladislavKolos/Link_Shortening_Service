@@ -34,12 +34,12 @@ public class LinkController {
     public void redirectToOriginalUrl(@PathVariable String shortKey, HttpServletResponse response) {
         var redirectData = linkService.getRedirectData(shortKey);
 
+        linkService.incrementClickCount(shortKey);
+
         response.setHeader(CACHE_CONTROL, CACHE_CONTROL_NO_CACHE);
         response.setHeader(PRAGMA, PRAGMA_NO_CACHE);
         response.setDateHeader(EXPIRES, EXPIRES_IMMEDIATELY);
         response.setHeader(LOCATION_HEADER, redirectData.originalUrl());
         response.setStatus(redirectData.status().value());
-
-        linkService.incrementClickCount(shortKey);
     }
 }

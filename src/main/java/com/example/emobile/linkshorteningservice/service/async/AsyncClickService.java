@@ -1,6 +1,6 @@
 package com.example.emobile.linkshorteningservice.service.async;
 
-import com.example.emobile.linkshorteningservice.model.Link;
+import com.example.emobile.linkshorteningservice.model.LinkEntity;
 import com.example.emobile.linkshorteningservice.repository.LinkRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,8 +19,8 @@ public class AsyncClickService {
                 .ifPresent(this::incrementAndSave);
     }
 
-    private void incrementAndSave(Link link) {
-        link.setClickCount(link.getClickCount() + CLICK_INCREMENT);
-        linkRepository.save(link);
+    private void incrementAndSave(LinkEntity linkEntity) {
+        linkEntity.setClickCount(linkEntity.getClickCount() + CLICK_INCREMENT);
+        linkRepository.save(linkEntity);
     }
 }

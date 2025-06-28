@@ -44,10 +44,7 @@ public class LinkServiceImpl implements LinkService {
 
         compositeLinkValidator.validate(link);
 
-        return LinkRedirectDto.builder()
-                .originalUrl(link.getOriginalUrl())
-                .status(HttpStatus.MOVED_PERMANENTLY)
-                .build();
+        return new LinkRedirectDto(link.getOriginalUrl(), HttpStatus.MOVED_PERMANENTLY);
     }
 
     @Override
