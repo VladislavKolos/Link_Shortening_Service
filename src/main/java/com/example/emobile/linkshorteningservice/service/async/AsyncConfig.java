@@ -1,33 +1,29 @@
 package com.example.emobile.linkshorteningservice.service.async;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import java.util.concurrent.Executor;
+import java.util.concurrent.ThreadPoolExecutor;
 
 @EnableAsync
 @Configuration
+@RequiredArgsConstructor
 public class AsyncConfig {
-    public static final int MAX_POOL_SIZE = 20;
-    public static final int CORE_POOL_SIZE = 5;
-    public static final int QUEUE_CAPACITY = 100;
-    public static final String THREAD_NAME_PREFIX = "AsyncClickCounter-";
+    private final AsyncProperties asyncProperties;
 
     @Bean
     public Executor taskExecutor() {
         var threadPoolExecutor = new ThreadPoolTaskExecutor();
 
-        threadPoolExecutor.setCorePoolSize(CORE_POOL_SIZE);
-        threadPoolExecutor.setMaxPoolSize(MAX_POOL_SIZE);
-        threadPoolExecutor.setQueueCapacity(QUEUE_CAPACITY);
-        threadPoolExecutor.setThreadNamePrefix(THREAD_NAME_PREFIX);
-        threadPoolExecutor.setRejectedExecutionHandler((r, executor) -> {
-            if (r instanceof Runnable runnable) {
-                runnable.run();
-            }
-        });
+        threadPoolExecutor.setCorePoolSize(asyncProperties.getCorePoolSize());
+        threadPoolExecutor.setMaxPoolSize(asyncProperties.getMaxPoolSize());
+        threadPoolExecutor.setQueueCapacity(asyncProperties.getQueueCapacity());
+        threadPoolExecutor.setThreadNamePrefix(asyncProperties.getThreadNamePrefix());
+        threadPoolExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
 
         threadPoolExecutor.initialize();
 
