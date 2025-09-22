@@ -8,6 +8,6 @@ public record ExceptionDto(
         int errorCode,
         String message,
         String path,
-        @JsonFormat(pattern = "dd.MM.yyyy HH:mm") OffsetDateTime timestamp
+        @JsonFormat(pattern = "dd.MM.yyyy HH:mmXXX") OffsetDateTime timestamp
 ) {
 }

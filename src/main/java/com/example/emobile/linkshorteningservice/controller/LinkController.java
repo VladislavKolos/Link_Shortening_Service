@@ -3,43 +3,49 @@ package com.example.emobile.linkshorteningservice.controller;
 import com.example.emobile.linkshorteningservice.dto.request.LinkRequestDto;
 import com.example.emobile.linkshorteningservice.dto.response.LinkResponseDto;
 import com.example.emobile.linkshorteningservice.service.LinkService;
-import com.example.emobile.linkshorteningservice.service.UriService;
-import jakarta.servlet.http.HttpServletResponse;
+import com.example.emobile.linkshorteningservice.util.UriBuilderUtil;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Mono;
 
-import static com.example.emobile.linkshorteningservice.util.LinkShorteningServiceConstantUtil.*;
-import static org.springframework.http.HttpHeaders.CACHE_CONTROL;
-import static org.springframework.http.HttpHeaders.EXPIRES;
-import static org.springframework.http.HttpHeaders.PRAGMA;
+import java.net.URI;
+
+import static com.example.emobile.linkshorteningservice.util.constant.HttpHeaderConstant.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/links")
+@RequestMapping("/api/v2/links")
 public class LinkController {
-    private final UriService uriService;
     private final LinkService linkService;
 
     @PostMapping
-    public ResponseEntity<LinkResponseDto> createShortLink(@Valid @RequestBody LinkRequestDto request) {
-        var response = linkService.createShortLink(request);
-        var location = uriService.createLinkUri(response.shortKey());
+    public Mono<ResponseEntity<LinkResponseDto>> createShortLink(@Valid @RequestBody LinkRequestDto request) {
+        return linkService.createShortLink(request)
+                .map(response -> {
+                    var location = UriBuilderUtil.createLinkUri(response.shortKey());
 
-        return ResponseEntity.created(location).body(response);
+                    return ResponseEntity.created(location).body(response);
+                });
     }
 
     @GetMapping("/{shortKey}")
-    public void redirectToOriginalUrl(@PathVariable String shortKey, HttpServletResponse response) {
-        var redirectData = linkService.getRedirectData(shortKey);
+    public Mono<Void> redirectToOriginalUrl(@PathVariable String shortKey, ServerHttpResponse response) {
+        return linkService.getRedirectData(shortKey)
+                .flatMap(linkRedirectDto ->
+                        linkService.incrementClickCount(shortKey)
+                                .then(Mono.defer(() -> {
+                                    response.getHeaders().setCacheControl(CACHE_CONTROL_NO_CACHE);
+                                    response.getHeaders().add(HttpHeaders.PRAGMA, PRAGMA_NO_CACHE);
+                                    response.getHeaders().setExpires(EXPIRES_IMMEDIATELY);
+                                    response.getHeaders().setLocation(URI.create(linkRedirectDto.originalUrl()));
+                                    response.setStatusCode(linkRedirectDto.status());
 
-        linkService.incrementClickCount(shortKey);
-
-        response.setHeader(CACHE_CONTROL, CACHE_CONTROL_NO_CACHE);
-        response.setHeader(PRAGMA, PRAGMA_NO_CACHE);
-        response.setDateHeader(EXPIRES, EXPIRES_IMMEDIATELY);
-        response.setHeader(LOCATION_HEADER, redirectData.originalUrl());
-        response.setStatus(redirectData.status().value());
+                                    return response.setComplete();
+                                }))
+                );
     }
 }

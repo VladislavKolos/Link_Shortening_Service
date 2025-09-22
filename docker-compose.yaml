@@ -6,6 +6,7 @@ services:
     container_name: postgres
     ports:
       - "5432:5432"
+    command: [ "-c", "shared_preload_libraries=pg_stat_statements" ]
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${DATASOURCE_USERNAME}
@@ -14,7 +15,8 @@ services:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - link_shortening_network
-    restart: always
+    profiles:
+      - dev
 
   postgres-test:
     image: postgres:16
@@ -31,9 +33,25 @@ services:
       - postgres_test_data:/var/lib/postgresql/data
     networks:
       - link_shortening_network
-    restart: always
     profiles:
       - test
+
+  gitlab:
+    image: gitlab/gitlab-ce:latest
+    container_name: gitlab-local
+    restart: always
+    hostname: 'localhost'
+    profiles: [ "gitlab" ]
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url 'http://localhost:8080'
+    ports:
+      - '8081:80'
+      - '2222:22'
+    volumes:
+      - ./gitlab/config:/etc/gitlab
+      - ./gitlab/logs:/var/log/gitlab
+      - ./gitlab/data:/var/opt/gitlab
 
   app:
     build:
@@ -46,12 +64,40 @@ services:
     depends_on:
       - postgres
     environment:
+      SPRING_R2DBC_URL: ${R2DBC_URL}
+      SPRING_R2DBC_USERNAME: ${DATASOURCE_USERNAME}
+      SPRING_R2DBC_PASSWORD: ${DATASOURCE_PASSWORD}
       SPRING_DATASOURCE_URL: ${DATASOURCE_URL}
       SPRING_DATASOURCE_USERNAME: ${DATASOURCE_USERNAME}
       SPRING_DATASOURCE_PASSWORD: ${DATASOURCE_PASSWORD}
       SPRING_PROFILES_ACTIVE: dev
     networks:
       - link_shortening_network
+    profiles:
+      - dev
+
+  app-test:
+    build:
+      context: .
+    container_name: link-shortening-service-test
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    depends_on:
+      - postgres-test
+    environment:
+      SPRING_R2DBC_URL: ${TEST_R2DBC_URL}
+      SPRING_R2DBC_USERNAME: ${TEST_DATASOURCE_USERNAME}
+      SPRING_R2DBC_PASSWORD: ${TEST_DATASOURCE_PASSWORD}
+      SPRING_DATASOURCE_URL: ${TEST_DATASOURCE_URL}
+      SPRING_DATASOURCE_USERNAME: ${TEST_DATASOURCE_USERNAME}
+      SPRING_DATASOURCE_PASSWORD: ${TEST_DATASOURCE_PASSWORD}
+      SPRING_PROFILES_ACTIVE: test
+    networks:
+      - link_shortening_network
+    profiles:
+      - test
 
 volumes:
   postgres_data:

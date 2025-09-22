@@ -1,52 +1,91 @@
 plugins {
-	id 'java'
-	id 'org.springframework.boot' version '3.4.5'
-	id 'io.spring.dependency-management' version '1.1.7'
+    id 'java'
+    id 'org.springframework.boot' version '3.4.5'
+    id 'io.spring.dependency-management' version '1.1.7'
+    id 'org.liquibase.gradle' version '2.1.1'
 }
 
 group = 'com.example'
 version = '0.0.1-SNAPSHOT'
 
 java {
-	toolchain {
-		languageVersion = JavaLanguageVersion.of(21)
-	}
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
 }
 
 configurations {
-	compileOnly {
-		extendsFrom annotationProcessor
-	}
+    compileOnly {
+        extendsFrom annotationProcessor
+    }
 }
 
 repositories {
-	mavenCentral()
+    mavenCentral()
 }
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	implementation 'org.springframework.boot:spring-boot-starter-validation'
-	implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
 
-	compileOnly 'org.projectlombok:lombok'
-	annotationProcessor 'org.projectlombok:lombok'
+    runtimeOnly 'org.postgresql:r2dbc-postgresql'
 
-	runtimeOnly 'org.postgresql:postgresql'
-	implementation 'org.liquibase:liquibase-core'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
 
-	implementation 'org.mapstruct:mapstruct:1.6.3'
-	annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
 
-	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    runtimeOnly 'org.postgresql:postgresql'
+    implementation 'org.liquibase:liquibase-core'
 
-	testCompileOnly 'org.projectlombok:lombok'
-	testAnnotationProcessor 'org.projectlombok:lombok'
+    implementation 'org.mapstruct:mapstruct:1.6.3'
+    annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
 
-	testImplementation 'org.mapstruct:mapstruct:1.6.3'
-	testAnnotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'io.projectreactor:reactor-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+    testCompileOnly 'org.projectlombok:lombok'
+    testAnnotationProcessor 'org.projectlombok:lombok'
+
+    testImplementation 'org.mapstruct:mapstruct:1.6.3'
+    testAnnotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
 }
 
 tasks.named('test') {
-	useJUnitPlatform()
+    useJUnitPlatform()
+}
+
+tasks.register("liquibaseRollbackLastDev", JavaExec) {
+    group = "liquibase"
+    description = "Rollback last changeset for dev DB"
+
+    mainClass.set("liquibase.integration.commandline.Main")
+    classpath = sourceSets.main.runtimeClasspath + configurations.runtimeClasspath
+
+    args = [
+            "--changeLogFile=src/main/resources/db/changelog/db.changelog-master.yaml",
+            "--url=jdbc:postgresql://localhost:5432/link_shortening_db",
+            "--username=postgres",
+            "--password=postgresql",
+            "rollbackCount",
+            "1"
+    ]
+}
+
+tasks.register("liquibaseRollbackLastTest", JavaExec) {
+    group = "liquibase"
+    description = "Rollback last changeset for test DB"
+
+    mainClass.set("liquibase.integration.commandline.Main")
+    classpath = sourceSets.main.runtimeClasspath + configurations.runtimeClasspath
+
+    args = [
+            "--changeLogFile=src/main/resources/db/changelog/db.changelog-master.yaml",
+            "--url=jdbc:postgresql://localhost:55432/link_shortening_test_db",
+            "--username=postgres",
+            "--password=postgresql",
+            "rollbackCount",
+            "1"
+    ]
 }

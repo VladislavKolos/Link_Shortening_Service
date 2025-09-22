@@ -1,8 +1,10 @@
 package com.example.emobile.linkshorteningservice.service.validator;
 
-import com.example.emobile.linkshorteningservice.model.LinkEntity;
+import com.example.emobile.linkshorteningservice.model.entity.LinkEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 
@@ -11,7 +13,9 @@ import java.util.List;
 public class CompositeLinkValidator {
     private final List<LinkValidator> linkValidators;
 
-    public void validate(LinkEntity linkEntity) {
-        linkValidators.forEach(validator -> validator.validate(linkEntity));
+    public Mono<Void> validate(LinkEntity linkEntity) {
+        return Flux.fromIterable(linkValidators)
+                .flatMap(linkValidator -> linkValidator.validate(linkEntity))
+                .then();
     }
 }

@@ -1,8 +1,9 @@
 package com.example.emobile.linkshorteningservice.service.validator;
 
-import com.example.emobile.linkshorteningservice.model.LinkEntity;
+import com.example.emobile.linkshorteningservice.model.entity.LinkEntity;
+import reactor.core.publisher.Mono;
 
 @FunctionalInterface
 public interface LinkValidator {
-    void validate(LinkEntity linkEntity);
+    Mono<Void> validate(LinkEntity linkEntity);
 }

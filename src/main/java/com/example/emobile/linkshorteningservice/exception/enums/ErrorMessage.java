@@ -26,6 +26,10 @@ public enum ErrorMessage {
             "The requested link was not found. It may have been deleted or is incorrect.",
             404),
 
+    DUPLICATE_ALIAS_ERROR(
+            "This alias is already in use. Please choose another one.",
+            409),
+
     OPTIMISTIC_LOCK_ERROR(
             "The data you tried to update has been modified by another process. Please try again.",
             409);

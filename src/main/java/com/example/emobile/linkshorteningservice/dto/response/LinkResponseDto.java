@@ -7,7 +7,7 @@ import java.time.OffsetDateTime;
 public record LinkResponseDto(
         String shortKey,
         String alias,
-        @JsonFormat(pattern = "dd.MM.yyyy HH:mm") OffsetDateTime expiresAt,
+        @JsonFormat(pattern = "dd.MM.yyyy HH:mmXXX") OffsetDateTime expiresAt,
         boolean isActive
 ) {
 }

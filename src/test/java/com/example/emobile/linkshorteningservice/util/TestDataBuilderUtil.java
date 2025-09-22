@@ -1,7 +1,7 @@
 package com.example.emobile.linkshorteningservice.util;
 
 import com.example.emobile.linkshorteningservice.dto.request.LinkRequestDto;
-import com.example.emobile.linkshorteningservice.model.LinkEntity;
+import com.example.emobile.linkshorteningservice.model.entity.LinkEntity;
 import lombok.experimental.UtilityClass;
 
 import java.time.OffsetDateTime;
@@ -11,12 +11,6 @@ import java.util.UUID;
 public final class TestDataBuilderUtil {
     public static LinkEntity createValidLink() {
         return defaultLinkBuilder().build();
-    }
-
-    public static LinkEntity createExpiredLink() {
-        return defaultLinkBuilder()
-                .expiresAt(OffsetDateTime.now().minusDays(1))
-                .build();
     }
 
     public static LinkEntity.LinkEntityBuilder<?, ?> defaultLinkBuilder() {

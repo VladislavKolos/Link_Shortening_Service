@@ -1,6 +1,5 @@
 package com.example.emobile.linkshorteningservice.dto.request;
 
-import com.example.emobile.linkshorteningservice.service.validator.constraint.annotation.UniqueAlias;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
@@ -13,7 +12,6 @@ public record LinkRequestDto(
         @Pattern(regexp = "^(https?|ftp)://[^\\s/$.?#].\\S*$")
         String originalUrl,
 
-        @UniqueAlias
         @Size(min = 3, max = 255)
         @Pattern(regexp = "^[a-zA-Z0-9_-]*$")
         String alias,

@@ -3,5 +3,3 @@ databaseChangeLog:
       file: db/changelog/v/v1/2025-05-20-create-link-table.yaml
   - include:
       file: db/changelog/v/v1/2025-05-20-create-indexes-for-link-table.yaml
-  - include:
-      file: db/changelog/v/v1/2025-05-22-add_version_column_to_link_table.yaml

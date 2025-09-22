@@ -3,7 +3,7 @@ package com.example.emobile.linkshorteningservice.mapper;
 import com.example.emobile.linkshorteningservice.dto.request.LinkRequestDto;
 import com.example.emobile.linkshorteningservice.dto.response.LinkResponseDto;
 import com.example.emobile.linkshorteningservice.exception.InvalidTtlException;
-import com.example.emobile.linkshorteningservice.model.LinkEntity;
+import com.example.emobile.linkshorteningservice.model.entity.LinkEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
@@ -20,7 +20,6 @@ public interface LinkMapper {
     LinkResponseDto toLinkResponseDto(LinkEntity entity);
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "version", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     @Mapping(target = "clickCount", source = "request", qualifiedByName = "setInitialClickCount")
